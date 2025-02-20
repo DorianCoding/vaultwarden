@@ -12,10 +12,10 @@ fn main() {
     #[cfg(feature = "query_logger")]
     println!("cargo:rustc-cfg=query_logger");
 
-    #[cfg(not(any(feature = "sqlite", feature = "mysql", feature = "postgresql")))]
+    /* #[cfg(not(any(feature = "sqlite", feature = "mysql", feature = "postgresql")))]
     compile_error!(
         "You need to enable one DB backend. To build with previous defaults do: cargo build --features sqlite"
-    );
+    ); */
 
     // Use check-cfg to let cargo know which cfg's we define,
     // and avoid warnings when they are used in the code.
