@@ -650,7 +650,10 @@ async fn send_email(address: &str, subject: &str, body_html: String, body_text: 
                     Some(true) => DkimSigningAlgorithm::Rsa,
                     _ => DkimSigningAlgorithm::Ed25519,
                 };
-                let mut key = String::with_capacity(4096);
+                let (algo, mut key) = match CONFIG.dkim_algo() {
+                    Some(true) => (DkimSigningAlgorithm::Rsa,String::with_capacity(4096)),
+                    _ => (DkimSigningAlgorithm::Ed25519,String::with_capacity(64)),
+                };
                 let sig = match std::fs::File::open(sig) {
                     Ok(mut f) => {
                         if let Err(e) = f.read_to_string(&mut key) {
