@@ -10,7 +10,7 @@ use lettre::{
     Address, AsyncSendmailTransport, AsyncSmtpTransport, AsyncTransport, Tokio1Executor,
 };
 use percent_encoding::{percent_encode, NON_ALPHANUMERIC};
-use std::{env::consts::EXE_SUFFIX, io::Read, str::FromStr};
+use std::{env::consts::EXE_SUFFIX, fs, str::FromStr};
 
 use crate::{
     api::EmptyResult,
@@ -650,14 +650,12 @@ async fn send_email(address: &str, subject: &str, body_html: String, body_text: 
                     Some(true) => DkimSigningAlgorithm::Rsa,
                     _ => DkimSigningAlgorithm::Ed25519,
                 };
-                let mut key = String::with_capacity(4096);
-                let sig = match std::fs::File::open(sig) {
-                    Ok(mut f) => {
-                        if let Err(e) = f.read_to_string(&mut key) {
-                            debug!("Cannot read DKIM file. Err is {:?}", e);
+                let sig = match fs::read_to_string(sig) {
+                    Err(e) => {
+                        debug!("Cannot read DKIM file. Err is {:?}", e);
                             None
-                        } else {
-                            key.shrink_to_fit();
+                    },
+                    Ok(key) => {
                             match DkimSigningKey::new(&key, algo) {
                                 Ok(d) => Some(d),
                                 Err(e) => {
@@ -666,11 +664,6 @@ async fn send_email(address: &str, subject: &str, body_html: String, body_text: 
                                 }
                             }
                         }
-                    },
-                    Err(e) => {
-                        debug!("Cannot read DKIM file. Err is {:?}", e);
-                        None
-                    }
                 };
                 match (sig, infos.split(':').collect::<Vec<&str>>()) {
                     (Some(sig), split2) if split2.len() == 2 => {
