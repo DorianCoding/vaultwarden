@@ -2,18 +2,18 @@ use std::{net::IpAddr, sync::Arc, time::Duration};
 
 use chrono::{NaiveDateTime, Utc};
 use rmpv::Value;
-use rocket::{futures::StreamExt, Route};
+use rocket::{Route, futures::StreamExt};
 use tokio::sync::mpsc::Sender;
 
 use rocket_ws::{Message, WebSocket};
 
 use crate::{
+    CONFIG, Error,
     auth::{ClientIp, WsAccessTokenHeader},
     db::{
-        models::{AuthRequestId, Cipher, CollectionId, DeviceId, Folder, Send as DbSend, User, UserId},
         DbConn,
+        models::{AuthRequestId, Cipher, CollectionId, DeviceId, Folder, Send as DbSend, User, UserId},
     },
-    Error, CONFIG,
 };
 
 use once_cell::sync::Lazy;

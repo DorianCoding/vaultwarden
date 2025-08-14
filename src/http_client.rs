@@ -6,16 +6,17 @@ use std::{
     time::Duration,
 };
 
-use hickory_resolver::{system_conf::read_system_conf, TokioAsyncResolver};
+use hickory_resolver::{TokioAsyncResolver, system_conf::read_system_conf};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use reqwest::{
+    Client, ClientBuilder,
     dns::{Name, Resolve, Resolving},
-    header, Client, ClientBuilder,
+    header,
 };
 use url::Host;
 
-use crate::{util::is_global, CONFIG};
+use crate::{CONFIG, util::is_global};
 
 pub fn make_http_request(method: reqwest::Method, url: &str) -> Result<reqwest::RequestBuilder, crate::Error> {
     let Ok(url) = url::Url::parse(url) else {
